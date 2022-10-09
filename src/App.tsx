@@ -1,26 +1,26 @@
-import React from 'react';
-import logo from './logo.svg';
+import Container from 'react-bootstrap/Container';
+import ReactFlowTsla from './components/ReactFlowRender';
 import './App.css';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
-}
-
+const App = () => {
+    console.log("container: ",[Container])
+    return (
+        <div>
+            <Container
+            fluid="md"
+            style={{backgroundColor:"#ffcccc"}}
+            >
+                    <h1 
+                        className="header"
+                        style={{color:"white"}}    
+                    >
+                        Hello World
+                    </h1>
+            </Container>
+            <ReactFlowTsla />
+            
+        </div>
+    )
+};
+//console.log([App])
 export default App;

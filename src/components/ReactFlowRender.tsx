@@ -10,13 +10,16 @@ import ReactFlow, {
   useNodesState,
   useEdgesState,
   Controls,
+  BackgroundVariant,
+  Background,
   Edge,
   Node
 } from 'reactflow';
 import 'reactflow/dist/style.css';
-import './ReactFlowRender.css';
+//import './ReactFlowRender.css';
 import React, { useState, 
   useRef, useCallback } from 'react';
+
 
 let id = 0;
 const getId = () => `dndnode_${id++}`;
@@ -40,6 +43,8 @@ const DnDFlow:React.FC = () => {
 
       const reactFlowBounds = reactFlowWrapper.current.getBoundingClientRect();
       const type = event.dataTransfer.getData('application/reactflow');
+      console.log(type)
+      //console.log({...event.dataTransfer})
 
       // check if the dropped element is valid
       if (typeof type === 'undefined' || !type) {
@@ -52,7 +57,7 @@ const DnDFlow:React.FC = () => {
       });
       const newNode:any = {
         id: getId(),
-        type,
+        type:{type},
         position,
         data: { label: `${type} node` },
       };
@@ -63,9 +68,8 @@ const DnDFlow:React.FC = () => {
   );
 
   return (
-    <div className="dndflow">
       <ReactFlowProvider>
-        <Container  style={{
+        <Container className='p-3' style={{
               height: "70vh",
               width: "90vw",
               border: "1px solid black",
@@ -83,13 +87,20 @@ const DnDFlow:React.FC = () => {
             onDragOver={onDragOver}
             fitView
           >
+            <Background 
+              variant={BackgroundVariant.Dots}
+              gap={15} 
+              size={1} 
+              color="red"
+            />
             <Controls />
           </ReactFlow>
-          <DragNode />
+          
         </Container>
+        <DragNode />
         
       </ReactFlowProvider>
-    </div>
+      
   );
 };
 

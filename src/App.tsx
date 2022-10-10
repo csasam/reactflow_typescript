@@ -17,7 +17,10 @@ const App = () => {
                         Hello World
                     </h1>
             </Container>
-            <ReactFlowTsla />
+            <Container>
+                <ReactFlowTsla />
+            </Container>
+            
             
         </div>
     )

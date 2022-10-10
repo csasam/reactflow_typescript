@@ -3,81 +3,94 @@ import Container from "react-bootstrap/Container";
 import { nodetypes } from './NodeTypes'
 import Button from 'react-bootstrap/Button';
 import Stack from "react-bootstrap/Stack";
+import DragNode from "./DragNode";
 import ReactFlow, {
-    Background,
-    BackgroundVariant,
-    MiniMap,
-    Controls
-  } from "react-flow-renderer";
-import { Children, useState } from "react";
-import { type } from "os";
+  ReactFlowProvider,
+  addEdge,
+  useNodesState,
+  useEdgesState,
+  Controls,
+  Edge,
+  Node
+} from 'reactflow';
+import 'reactflow/dist/style.css';
+import './ReactFlowRender.css';
+import React, { useState, 
+  useRef, useCallback } from 'react';
 
-type newNode = {id: string, 
-    data:object, 
-    type: string,
-    position: object
-    }
+let id = 0;
+const getId = () => `dndnode_${id++}`;
 
-const ReactFlowTsla: React.FC = () => {
-    const [elements,setElements] = useState<newNode[]>([])
-    const [name,setName] = useState("")
-    const addShopHandler = () => {
-        const newNode: newNode =  {
-          id: `${Date.now()}`,
-          data: { label: `${name}` },
-          type: "shop",
-          position: {
-            x: 0,
-            y: 0
-          }
-        };
-        newNode.data = { ...newNode.data, id: newNode.id };
-    
-        setElements((prev: any) => {
-          return [...prev, newNode];
-        });
-        setName("");
+const DnDFlow:React.FC = () => {
+  const reactFlowWrapper = useRef<any>(null);
+  const [nodes, setNodes, onNodesChange] = useNodesState<Node[]>([]);
+  const [edges, setEdges, onEdgesChange] = useEdgesState<Edge[]>([]);
+  const [reactFlowInstance, setReactFlowInstance] = useState<any>(null);
+
+  const onConnect = useCallback((params:any) => setEdges((eds) => addEdge(params, eds)), []);
+
+  const onDragOver = useCallback((event:any) => {
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'move';
+  }, []);
+
+  const onDrop = useCallback(
+    (event:any) => {
+      event.preventDefault();
+
+      const reactFlowBounds = reactFlowWrapper.current.getBoundingClientRect();
+      const type = event.dataTransfer.getData('application/reactflow');
+
+      // check if the dropped element is valid
+      if (typeof type === 'undefined' || !type) {
+        return;
+      }
+
+      const position = reactFlowInstance.project({
+        x: event.clientX - reactFlowBounds.left,
+        y: event.clientY - reactFlowBounds.top,
+      });
+      const newNode:any = {
+        id: getId(),
+        type,
+        position,
+        data: { label: `${type} node` },
       };
-    return (
-        <div>
-        <Container 
-            className="p-3"
-            //fluid = 'md'
-            style={{height: "75vh",
-            //width: "100vw",
-            border: "1px solid black",
-            marginBottom: "1.0vw",
-            // marginTop: "3.5vh",
-            // marginLeft: "11.5vw"
-            }}
-        >
-            
-            <ReactFlow
-                elements={elements}
-                nodeTypes={nodetypes}
 
-            >
-                <Background
-                    variant={BackgroundVariant.Dots}
-                    gap={15} 
-                    size={1} 
-                    color="red"
-                    //color="#c8c8c8" 
-                />
-                <MiniMap />
-                <Controls />
-                
-            </ReactFlow>
-            
-        </Container>
-        <Container>
-            <Stack direction="horizontal" gap={1}>
-            <Button onClick={addShopHandler}>Add Shop</Button>
-            </Stack>
+      setNodes((nds) => nds.concat(newNode));
+    },
+    [reactFlowInstance]
+  );
+
+  return (
+    <div className="dndflow">
+      <ReactFlowProvider>
+        <Container  style={{
+              height: "70vh",
+              width: "90vw",
+              border: "1px solid black",
+              marginBottom: "1vw"
+          }}
+          ref={reactFlowWrapper}>
+          <ReactFlow
+            nodes={nodes}
+            edges={edges}
+            onNodesChange={onNodesChange}
+            onEdgesChange={onEdgesChange}
+            onConnect={onConnect}
+            onInit={setReactFlowInstance}
+            onDrop={onDrop}
+            onDragOver={onDragOver}
+            fitView
+          >
+            <Controls />
+          </ReactFlow>
+          <DragNode />
         </Container>
         
-        </div>
-    )
-} ;
+      </ReactFlowProvider>
+    </div>
+  );
+};
 
-export default ReactFlowTsla!;
+export default DnDFlow;
